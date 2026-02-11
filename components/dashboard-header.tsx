@@ -71,7 +71,7 @@ export default function DashboardHeader() {
             </div>
             <div className='mt-10 md:mt-20 flex flex-col items-center text-center max-w-2xl mx-auto'>
                 <h1 className='text-4xl sm:text-6xl font-bold tracking-tight'>New Beginnings</h1>
-                <p className='mt-4 text-muted-foreground text-sm sm:text-base leading-relaxed'>Here dwell the stories that are just beginning to shine. Peek at the newest masterpieces through these latest blogs.</p>
+                <p className='mt-4 text-muted-foreground text-sm sm:text-base leading-relaxed'>Here dwell the stories that are just beginning to shine. Peek at the newest masterpieces through these blogs.</p>
             </div>
             <div className="mt-10 flex justify-center">
                 <AnimatedGroup variants={{ item: itemVariants }}>

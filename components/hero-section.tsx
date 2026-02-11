@@ -8,6 +8,8 @@ import { AnimatedGroup } from '@/components/ui/animated-group'
 import { HeroHeader } from './header'
 import { Variants } from 'framer-motion'
 import Blob from '@/components/ui/blob'
+import { SignUpButton } from "@clerk/nextjs";
+import { useEffect, useState } from 'react';
 
 
 const itemVariants = {
@@ -31,6 +33,15 @@ const itemVariants = {
 }
 
 export default function HeroSection() {
+    const [mounted, setMounted] = useState(false);
+
+    useEffect (() => {
+        setMounted(true);
+    }, []);
+
+    if (!mounted)
+        return null;
+
     return (
         <>
             <HeroHeader />
@@ -164,9 +175,8 @@ export default function HeroSection() {
                                         item: itemVariants,
                                     }}
                                     className="mt-12 flex flex-col items-center justify-center gap-2 md:flex-row">
-                                    <div
-                                        key={1}
-                                        className="bg-foreground/10 rounded-[calc(var(--radius-xl)+0.125rem)] border p-0.5">
+                                    <div key={1} className="bg-foreground/10 rounded-[calc(var(--radius-xl)+0.125rem)] border p-0.5">
+                                    <SignUpButton mode="modal">
                                         <Button
                                             asChild
                                             size="lg"
@@ -175,6 +185,7 @@ export default function HeroSection() {
                                                 <span className="text-nowrap">Join Us</span>
                                             </Link>
                                         </Button>
+                                    </SignUpButton>
                                     </div>
                                     <Button
                                         key={2}

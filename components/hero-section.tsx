@@ -1,3 +1,5 @@
+'use client'
+
 import React from 'react'
 import Link from 'next/link'
 import { ArrowRight, ChevronRight } from 'lucide-react'
@@ -8,7 +10,7 @@ import { AnimatedGroup } from '@/components/ui/animated-group'
 import { HeroHeader } from './header'
 import { Variants } from 'framer-motion'
 import Blob from '@/components/ui/blob'
-import { SignUpButton } from "@clerk/nextjs";
+import { SignUpButton, SignedOut } from "@clerk/nextjs";
 import { useEffect, useState } from 'react';
 
 
@@ -176,27 +178,31 @@ export default function HeroSection() {
                                     }}
                                     className="mt-12 flex flex-col items-center justify-center gap-2 md:flex-row">
                                     <div key={1} className="bg-foreground/10 rounded-[calc(var(--radius-xl)+0.125rem)] border p-0.5">
-                                    <SignUpButton mode="modal">
+                                    <SignedOut>
+                                        <SignUpButton mode="modal">
+                                            <Button
+                                                asChild
+                                                size="lg"
+                                                className="rounded-xl px-5 text-base">
+                                                <Link href="#link">
+                                                    <span className="text-nowrap">Join Us</span>
+                                                </Link>
+                                            </Button>
+                                        </SignUpButton>
+                                    </SignedOut>
+                                    </div>
+                                    <SignedOut>
                                         <Button
+                                            key={2}
                                             asChild
                                             size="lg"
-                                            className="rounded-xl px-5 text-base">
+                                            variant="ghost"
+                                            className="h-10.5 rounded-xl px-5">
                                             <Link href="#link">
-                                                <span className="text-nowrap">Join Us</span>
+                                                <span className="text-nowrap">Subscribe</span>
                                             </Link>
                                         </Button>
-                                    </SignUpButton>
-                                    </div>
-                                    <Button
-                                        key={2}
-                                        asChild
-                                        size="lg"
-                                        variant="ghost"
-                                        className="h-10.5 rounded-xl px-5">
-                                        <Link href="#link">
-                                            <span className="text-nowrap">Subscribe</span>
-                                        </Link>
-                                    </Button>
+                                    </SignedOut>
                                 </AnimatedGroup>
                             </div>
                         </div>

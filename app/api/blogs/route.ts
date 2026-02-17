@@ -10,6 +10,7 @@ export async function GET() {
                 title: true,
                 blogId: true,
                 imageUrl: true,
+                content: true,
                 createdAt: true,
                 updatedAt: true
             },

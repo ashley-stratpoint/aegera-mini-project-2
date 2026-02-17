@@ -28,7 +28,7 @@ export const posts = pgTable('posts', {
     categoryId: integer('category_id').references(()=> categories.id).notNull(),
     content: text('content').notNull(),
     imageUrl: text('image_url').notNull(),
-    authorId: varchar('author_id', { length: 255 }).references(() => users.id).notNull(),
+    authorId: integer('author_id').references(() => users.id).notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
@@ -36,7 +36,7 @@ export const posts = pgTable('posts', {
 export const comments = pgTable('comments', {
     id: serial('id').primaryKey(),
     content: text('content').notNull(),
-    authorId: varchar('author_id', { length: 255 }).references(() => users.id).notNull(),
+    authorId: integer('author_id').references(() => users.id).notNull(),
     postId: integer('post_id').references(() => posts.id, { onDelete: 'cascade' }).notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
@@ -59,6 +59,7 @@ export const usersRelations = relations(users, ({ many }) => ({
 
 export const postsRelations = relations(posts, ({ one, many }) => ({
     author: one(users, { fields: [posts.authorId], references: [users.id] }),
+    category: one(categories, { fields: [posts.categoryId], references: [categories.id] }),
     comments: many(comments),
     likes: many(likes),
 }));

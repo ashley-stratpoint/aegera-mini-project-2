@@ -9,7 +9,7 @@ CREATE TABLE "categories" (
 CREATE TABLE "comments" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"content" text NOT NULL,
-	"author_id" varchar(255) NOT NULL,
+	"author_id" integer NOT NULL,
 	"post_id" integer NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
@@ -28,7 +28,7 @@ CREATE TABLE "posts" (
 	"category_id" integer NOT NULL,
 	"content" text NOT NULL,
 	"image_url" text NOT NULL,
-	"author_id" varchar(255) NOT NULL,
+	"author_id" integer NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "posts_blog_id_unique" UNIQUE("blog_id")

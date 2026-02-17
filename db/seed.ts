@@ -2,96 +2,79 @@ import * as schema from "./schema";
 import { drizzle } from "drizzle-orm/neon-http";
 import { neon } from "@neondatabase/serverless";
 import { users, categories, posts, comments, likes } from "./schema";
+import { FIXED_CATEGORIES } from "../lib/constants";
 import * as dotenv from "dotenv";
 
 dotenv.config({ path: ".env.local" });
 
-const dbUrl = process.env.DATABASE_URL;
-
-if (!dbUrl) {
-    throw new Error("DATABASE_URL is missing from .env.local");
-}
-
-const sql = neon(dbUrl);
-
-const db = drizzle(sql, {
-    schema,
-});
+const sql = neon(process.env.DATABASE_URL!);
+const db = drizzle(sql, { schema });
 
 const main = async () => {
     try {
-        console.log("Emptying existing data...");
+        console.log("Emptying interactions and posts...");
         await db.delete(likes);
         await db.delete(comments);
         await db.delete(posts);
-        await db.delete(categories);
         await db.delete(users);
+        await db.delete(categories);
 
-        console.log("Seeding users...");
-        const [user1] = await db.insert(users).values([
-            {
-                clerkId: "user_2P6k...",
-                email: "alex@example.com",
-                firstName: "Alex",
-                lastName: "Rivera",
-                imageUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex",
-            },
-            {
-                clerkId: "user_8J9l...",
-                email: "sam@example.com",
-                firstName: "Sam",
-                lastName: "Tech",
-                imageUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sam",
-            }
-        ]).returning();
+        console.log("Seeding 10 users...");
+        const seededUsers = await db.insert(users).values(
+            Array.from({ length: 10 }).map((_, i) => ({
+                clerkId: `user_clerk_${i}`,
+                email: `user${i}@example.com`,
+                firstName: `User${i}`,
+                lastName: `Tester`,
+                imageUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=User${i}`,
+            }))
+        ).returning();
 
-        console.log("Seeding categories...");
-        const [catSi, catMu, catLa, catDesign, catDev] = await db.insert(categories).values([
-            { name: "Sining (Arts & Crafts)", slug: "sining", color: "#3b82f6" },
-            { name: "Musika (Music)", slug: "musika", color: "#ec4899" },
-            { name: "Poems (Tula)", slug: "tula", color: "#10b981" },
-            { name: "Design", slug: "design", color: "#10b981" },
-            { name: "Development", slug: "development", color: "#10b981" },
-        ]).returning();
+        console.log("Seeding fixed categories...");
+        const dbCategories = await db.insert(categories)
+            .values(FIXED_CATEGORIES)
+            .returning();
 
-        console.log("Seeding posts...");
-        const [post1, post2] = await db.insert(posts).values([
-            {
-                title: "Mastering the Art of Glassmorphism in Modern Web Design",
-                blogId: "mastering-glassmorphism-2026",
-                categoryId: catDesign.id,
-                content: "<p>Glassmorphism is more than just a trend; it's a way to create depth and hierarchy using transparency and blur...</p>",
-                imageUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop",
-                authorId: user1.id.toString(),
-            },
-            {
-                title: "The Future of Full-Stack: Next.js 15 and Drizzle ORM",
-                blogId: "future-of-fullstack-drizzle",
-                categoryId: catDev.id,
-                content: "<p>The developer experience has never been better. With typesafe ORMs like Drizzle, we can build robust apps faster...</p>",
-                imageUrl: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1000&auto=format&fit=crop",
-                authorId: user1.id.toString(),
-            }
-        ]).returning();
+        console.log("Seeding 10 posts (1 per user)...");
+        const seededPosts = await db.insert(posts).values(
+            seededUsers.map((user, i) => {
+                const category = dbCategories[i % dbCategories.length];
+                return {
+                    title: `${category.name} Journey by ${user.firstName}`,
+                    blogId: `post-${i + 1}-${category.slug}`,
+                    categoryId: category.id,
+                    content: `<p>Testing content for ${category.name}.</p>`,
+                    imageUrl: `https://picsum.photos/seed/${i + 200}/1000/600`,
+                    authorId: user.id,
+                };
+            })
+        ).returning();
 
         console.log("Seeding interactions...");
-        await db.insert(comments).values([
-            {
-                content: "This is exactly what I was looking for! The blur effect is stunning.",
-                authorId: user1.id.toString(),
-                postId: post1.id,
+        const allLikes = [];
+        const allComments = [];
+
+        for (const post of seededPosts) {
+            // All 10 users like every post
+            for (const user of seededUsers) {
+                allLikes.push({ userId: user.id, postId: post.id });
             }
-        ]);
+            // 3 comments per post
+            for (let i = 0; i < 3; i++) {
+                allComments.push({
+                    content: `Insightful post about ${dbCategories.find(c => c.id === post.categoryId)?.name}!`,
+                    authorId: seededUsers[i].id,
+                    postId: post.id,
+                });
+            }
+        }
 
-        await db.insert(likes).values([
-            { userId: user1.id.toString(), postId: post1.id },
-            { userId: user1.id.toString(), postId: post2.id },
-        ]);
+        await db.insert(likes).values(allLikes);
+        await db.insert(comments).values(allComments);
 
-        console.log("Seeding completed successfully!");
-    } catch(err) {
-        console.error("Seeding failed!");
-        console.error(err);
+        console.log("Seeding complete with fixed categories.");
+    } catch (err) {
+        console.error("Seeding failed!", err);
         process.exit(1);
     }
 };

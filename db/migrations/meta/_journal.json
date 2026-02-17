@@ -8,6 +8,13 @@
       "when": 1771310993272,
       "tag": "0000_great_texas_twister",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1771314962294,
+      "tag": "0001_curly_zaran",
+      "breakpoints": true
     }
   ]
 }

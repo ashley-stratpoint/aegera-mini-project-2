@@ -11,7 +11,7 @@ export const users = pgTable('users', {
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
 },
-    (table) => [uniqueIndex('clerk_id_idx').on(table.clerkId), index('email_idx').on(table.email)],
+    (table) => [index('clerk_id_idx').on(table.clerkId), index('email_idx').on(table.email)],
 );
 
 export const categories = pgTable('categories', {
@@ -19,7 +19,9 @@ export const categories = pgTable('categories', {
     name: text('name').notNull(),
     slug: varchar('slug', { length: 255 }).notNull().unique(),
     color: varchar('color', { length: 7 }).default('#3b82f6'),
-});
+},
+    (table) => [index('category_slug_idx').on(table.slug)],
+);
 
 export const posts = pgTable('posts', {
     id: serial('id').primaryKey(),
@@ -31,7 +33,9 @@ export const posts = pgTable('posts', {
     authorId: integer('author_id').references(() => users.id).notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
+}, 
+    (table) => [index('blog_id_idx').on(table.blogId)],
+);
 
 export const comments = pgTable('comments', {
     id: serial('id').primaryKey(),
@@ -40,13 +44,14 @@ export const comments = pgTable('comments', {
     postId: integer('post_id').references(() => posts.id, { onDelete: 'cascade' }).notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
+},
+    (table) => [index('comment_post_id_idx').on(table.postId)],
+);
 
 export const likes = pgTable('likes', {
-    userId: varchar('user_id', { length: 255 }).references(() => users.id).notNull(),
+    userId: integer('user_id').references(() => users.id).notNull(),
     postId: integer('post_id').references(() => posts.id, { onDelete: 'cascade' }).notNull(),
-}, (table) => ({
-    pk: primaryKey({ columns: [table.userId, table.postId] }),
+}, (table) => ({pk: primaryKey({ columns: [table.userId, table.postId] }),
 }));
 
 // RELATIONS

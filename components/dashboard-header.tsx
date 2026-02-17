@@ -69,39 +69,6 @@ export default function DashboardHeader() {
                         />
                 </div>
             </div>
-            <div className='mt-10 md:mt-20 flex flex-col items-center text-center max-w-2xl mx-auto'>
-                <h1 className='text-4xl sm:text-6xl font-bold tracking-tight'>New Beginnings</h1>
-                <p className='mt-4 text-muted-foreground text-sm sm:text-base leading-relaxed'>Here dwell the stories that are just beginning to shine. Peek at the newest masterpieces through these blogs.</p>
-            </div>
-            <div className="mt-10 flex justify-center">
-                <AnimatedGroup variants={{ item: itemVariants }}>
-                    <form 
-                        onSubmit={handleSearch}
-                        className="hover:bg-background dark:hover:border-t-border bg-muted group flex w-full max-w-md items-center gap-3 rounded-full border p-1.5 pl-4 shadow-md shadow-zinc-950/5 transition-all duration-300 focus-within:ring-2 focus-within:ring-primary/20 dark:border-t-white/5 dark:shadow-zinc-950"
-                    >
-                        
-                        <input 
-                            type="text"
-                            placeholder="Search categories"
-                            value={query}
-                            onChange={(e) => setQuery(e.target.value)}
-                            className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground/60 text-foreground"
-                        />
-
-                        <span className="dark:border-background block h-4 w-0.5 border-l bg-white dark:bg-zinc-700"></span>
-                        
-                        <button 
-                            type="submit"
-                            className="bg-background group-hover:bg-primary group-hover:text-primary-foreground size-8 overflow-hidden rounded-full duration-500 transition-colors flex items-center justify-center"
-                        >
-                            <div className="flex w-20 -translate-x-[20px] items-center justify-center shrink-0 duration-500 ease-in-out group-hover:translate-x-1/4">
-                                <Search className="m-auto size-4 shrink-0" />
-                                <Search className="m-auto size-4 shrink-0" />
-                            </div>
-                        </button>
-                    </form>
-                </AnimatedGroup>
-            </div>
         </div>
     )
 }

@@ -32,15 +32,18 @@ export async function GET(
                     }
                 },
                 comments: {
-                    columns: {
-                        id: true,
-                        content: true,
-                        authorId: true,
-                        createdAt: true,
-                        updatedAt: true
+                    with: {
+                        author: {
+                            columns: {
+                                firstName: true,
+                                lastName: true, 
+                                imageUrl: true
+                            }
+                        }
                     }
                 }
             },
+            orderBy: (comments, { desc }) => [desc(comments.createdAt)],
             extras: {
                 likeCount: sql<number>`
                     cast((SELECT COUNT(*) 
@@ -55,7 +58,6 @@ export async function GET(
             },
         });
 
-        // If blog post does not exist
         if (!post) {
             return NextResponse.json(
                 { error: "Post not found." },

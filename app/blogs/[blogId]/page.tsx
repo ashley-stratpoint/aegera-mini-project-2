@@ -12,13 +12,18 @@ import { getBlog } from "@/lib/blogs";
 import { syncUser } from "@/lib/actions/sync-user";
 import Interactions from "@/components/interactions";
 import CommentSection from "@/components/comments-section";
+import { DeletePostButton } from "@/components/delete-post-button";
+import { Button } from "@/components/ui/button";
+import WriteBlogPost from "@/components/write-blog-post";
 
 type Props = {
     params: Promise<{ blogId: string }>;
+    searchParams: Promise<{ mode?: string }>;
 }
 
 export const generateMetadata = async ({ params }: Props): Promise<Metadata> => {
     const { blogId } = await params;
+
     const post = await getBlog(blogId);
     
     if (!post) {
@@ -44,23 +49,55 @@ export const generateMetadata = async ({ params }: Props): Promise<Metadata> => 
     };
 };
 
-export default async function BlogPostDetails({ params }: Props) {
+export default async function BlogPostDetails({ params, searchParams }: Props) {
     const { blogId } = await params;
-    const post = await getBlog(blogId);
+    const { mode } = await searchParams;
 
+    const post = await getBlog(blogId);
     if (!post) {
         notFound();
     }
 
     const user = await syncUser();
+    const isOwner = user?.id === post.authorId;
+
+    const isEditing = mode === "edit" && isOwner;
+    const isEdited = Math.floor(new Date(post.updatedAt).getTime() / 1000) > Math.floor(new Date(post.createdAt).getTime() / 1000);
+
+    if (isEditing) {
+        return (
+            <WriteBlogPost 
+                userId={user?.id as number} 
+                initialData={{
+                    id: post.id,
+                    blogId: post.blogId,
+                    title: post.title,
+                    content: post.content,
+                    imageUrl: post.imageUrl,
+                    categorySlug: post.category.slug
+                }} 
+            />
+        );
+    }
 
     return (
         <article className="max-w-3xl mx-auto py-10 px-6">
-            <div className="mb-10">
-                <Link href="/blogs" className="text-sm font-medium text-zinc-500 hover:text-black flex items-center gap-1 transition-colors">
-                    <ChevronLeft className="w-4 h-4" />
-                    Back to SIMULA
+            <div className="flex justify-between items-center mb-10 w-full">
+                <Link href="/blogs" className="flex items-center gap-1 text-sm font-medium text-zinc-500 hover:text-black transition-colors">
+                    <ChevronLeft className="w-4 h-4" /> 
+                    <span>Back to SIMULA</span>
                 </Link>
+
+                {isOwner && (
+                    <div className="flex items-center gap-2">
+                        <Link href={`/blogs/${post.blogId}?mode=edit`}>
+                            <Button variant="outline" size="sm" className="rounded-full">
+                                Edit
+                            </Button>
+                        </Link>
+                        <DeletePostButton blogId={post.blogId} postId={post.id} />
+                    </div>
+                )}
             </div>
             <div className="mb-6">
                 <Badge 
@@ -97,7 +134,18 @@ export default async function BlogPostDetails({ params }: Props) {
                             By {post.author.firstName} {post.author.lastName}
                         </span>
                         <span>•</span>
-                        <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+                        <div className="flex items-center gap-1.5">
+                            <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+                            {isEdited && (
+                                <span 
+                                    className="text-xs italic opacity-50 flex items-center gap-1.5"
+                                    title={`Last updated: ${new Date(post.updatedAt).toLocaleString()}`}
+                                >
+                                    <span className="text-[10px] leading-none">•</span>
+                                    Edited
+                                </span>
+                            )}
+                        </div>
                     </div>
                 </div>
             </header>

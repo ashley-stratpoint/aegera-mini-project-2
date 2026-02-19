@@ -1,14 +1,13 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
 const isProtectedRoute = createRouteMatcher([
   '/blogs/write(.*)',
-  '/api/post(.*)',
+  '/blogs/edit(.*)',
+  '/api/blogs/(.*)'
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
-  if (isProtectedRoute(req)) {
-    await auth.protect();
-  }
+  if (isProtectedRoute(req)) await auth.protect();
 });
 
 export const config = {

@@ -9,6 +9,7 @@ export async function GET() {
                 id: true,
                 title: true,
                 blogId: true,
+                authorId: true,
                 categoryId:true,
                 imageUrl: true,
                 content: true,

@@ -5,6 +5,7 @@ import { posts } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
 export async function createPost(
     authorId: number,
@@ -48,7 +49,7 @@ export async function createPost(
         });
 
         revalidatePath("/blogs");
-        revalidatePath(`/blog/${finalBlogId}`);
+        revalidatePath(`/blogs/${finalBlogId}`);
         
         return { success: true, slug: finalBlogId };
     } catch (error: any) {
@@ -60,36 +61,50 @@ export async function createPost(
     }
 }
 
-export async function updatePost(id: number, blogId: string, newCategoryId: number, newContent: string, newImageUrl: string, newTitle: string) {
+export async function updatePost(
+    postId: number, 
+    newBlogId: string,
+    newCategoryId: number, 
+    newContent: string, 
+    newImageUrl: string, 
+    newTitle: string
+) {
+    const { userId: clerkId } = await auth();
+    if (!clerkId) return { success: false, error: "Unauthorized" };
+
     try {
         await db.update(posts)
             .set({ 
+                blogId: newBlogId,
                 title: newTitle,
                 content: newContent,
                 categoryId: newCategoryId,
                 imageUrl: newImageUrl,
                 updatedAt: new Date()
             })
-            .where(eq(posts.id, id));
+            .where(eq(posts.id, postId));
 
-        revalidatePath("/blog");
-        revalidatePath(`/blog/${blogId}`);
-        
-        return { success: true };
+        revalidatePath("/blogs");
+        revalidatePath(`/blogs/${newBlogId}`);
+        return { success: true, slug: newBlogId };
     } catch (error) {
-        return { success: false, error: "Failed to update post." };
+        return { success: false, error: "Failed to update." };
     }
 }
 
 export async function deletePost(postId: number, blogId: string) {
+    let isSuccessful = false;
     try {
         await db.delete(posts).where(eq(posts.id, postId));
-
-        revalidatePath("/blog");
-        revalidatePath(`/blog/${blogId}`);
-        
-        return { success: true };
+        revalidatePath("/blogs");
+        revalidatePath(`/blogs/${blogId}`);
+        isSuccessful = true;
     } catch (error) {
+        console.error("Delete Error:", error);
         return { success: false, error: "Failed to delete post." };
+    }
+
+    if (isSuccessful) {
+        redirect("/blogs");
     }
 }

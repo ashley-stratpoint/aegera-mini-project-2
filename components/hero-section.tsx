@@ -101,7 +101,7 @@ export default function HeroSection() {
                             <div className="text-center sm:mx-auto lg:mr-auto lg:mt-0">
                                 <AnimatedGroup variants={{item: itemVariants}}>
                                     <Link
-                                        href="#link"
+                                        href="/blogs"
                                         className="hover:bg-background dark:hover:border-t-border bg-muted group mx-auto flex w-fit items-center gap-4 rounded-full border p-1 pl-4 shadow-md shadow-zinc-950/5 transition-colors duration-300 dark:border-t-white/5 dark:shadow-zinc-950">
                                         <span className="text-foreground text-sm">Sining, Musika, Tula, atbp.</span>
                                         <span className="dark:border-background block h-4 w-0.5 border-l bg-white dark:bg-zinc-700"></span>
@@ -184,25 +184,13 @@ export default function HeroSection() {
                                                 asChild
                                                 size="lg"
                                                 className="rounded-xl px-5 text-base">
-                                                <Link href="#link">
+                                                <Link href="/blogs">
                                                     <span className="text-nowrap">Join Us</span>
                                                 </Link>
                                             </Button>
                                         </SignUpButton>
                                     </SignedOut>
                                     </div>
-                                    <SignedOut>
-                                        <Button
-                                            key={2}
-                                            asChild
-                                            size="lg"
-                                            variant="ghost"
-                                            className="h-10.5 rounded-xl px-5">
-                                            <Link href="#link">
-                                                <span className="text-nowrap">Subscribe</span>
-                                            </Link>
-                                        </Button>
-                                    </SignedOut>
                                 </AnimatedGroup>
                             </div>
                         </div>

@@ -6,9 +6,6 @@ import { redirect } from 'next/navigation';
 
 export default async function Home() {
   const { userId } = await auth();
-
-  if (userId)
-    redirect('/dashboard');
   
   return (
     <div className="flex flex-col min-h-screen">

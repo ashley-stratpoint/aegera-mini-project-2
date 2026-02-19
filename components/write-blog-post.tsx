@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition, useRef } from 'react';
+import { useState, useTransition, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, SendHorizonal, Bold, Italic, Underline as UnderlineIcon, ImageIcon, X, AlertCircle } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -8,7 +8,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescript
 import { useRouter } from "next/navigation";
 import { ToolbarToggle } from "@/components/toolbar-toggle";
 import { useEditor, EditorContent } from '@tiptap/react';
-import { createPost } from "@/lib/actions/posts";
+import { createPost, updatePost, deletePost } from "@/lib/actions/posts";
 import StarterKit from '@tiptap/starter-kit';
 import { Underline as UnderlineExtension } from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
@@ -16,16 +16,29 @@ import Link from "next/link";
 import { FIXED_CATEGORIES } from "@/lib/constants";
 import { Loader2 } from "lucide-react";
 
-export default function WriteBlogPost ({ userId }: { userId: number }) {
+interface WriteBlogPostProps {
+    userId: number;
+    initialData?: {
+        id: number;
+        blogId: string;
+        title: string;
+        content: string;
+        imageUrl: string;
+        categorySlug: string;
+    };
+}
+
+export default function WriteBlogPost ({ userId, initialData }: WriteBlogPostProps) {
     const [isPending, startTransition] = useTransition();
     const router = useRouter();
-    const [image, setImage] = useState("");
-    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [title, setTitle] = useState(initialData?.title || "");
+    const [categorySlug, setCategorySlug] = useState<string | undefined>(initialData?.categorySlug);
+    const [image, setImage] = useState(initialData?.imageUrl || "");
+    const [imagePreview, setImagePreview] = useState<string | null>(initialData?.imageUrl || null);
     const DEFAULT_NO_IMAGE = "https://placehold.co/600x400/f4f4f5/a1a1aa?text=No+Cover+Image";
-    const [title, setTitle] = useState("");
-    const [categorySlug, setCategorySlug] = useState<string | undefined>(undefined);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
 
     const editor = useEditor({
         extensions: [
@@ -38,6 +51,8 @@ export default function WriteBlogPost ({ userId }: { userId: number }) {
                 placeholder: 'Start your story...',
             }),
         ],
+
+        content: initialData?.content || "", 
         immediatelyRender: false,
         editorProps: {
             attributes: {
@@ -45,6 +60,12 @@ export default function WriteBlogPost ({ userId }: { userId: number }) {
             },
         },
     });
+
+    useEffect(() => {
+        if (editor && initialData?.content && editor.getHTML() !== initialData.content) {
+            editor.commands.setContent(initialData.content);
+        }
+    }, [editor, initialData?.content]);
 
     const handleUploadImage = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -69,6 +90,11 @@ export default function WriteBlogPost ({ userId }: { userId: number }) {
             setErrorMsg("All fields are required to complete submission.");
             return;
         }
+        
+        if (!category) {
+            setErrorMsg("Please select a valid category.");
+            return;
+        }
     
         const slug = currentTitle
             .toLowerCase()
@@ -78,22 +104,38 @@ export default function WriteBlogPost ({ userId }: { userId: number }) {
             .replace(/^-+|-+$/g, '');
     
         startTransition(async () => {
-            const result = await createPost(
-                userId,
-                slug,
-                image || DEFAULT_NO_IMAGE,
-                currentTitle,
-                currentContent,
-                categoryId
-            );
-        
-            if (result.success && result.slug) {
-                router.push(`/blogs/${result.slug}`);
-                router.refresh();
+            if (initialData) {
+                const result = await updatePost(
+                    initialData.id,
+                    initialData.blogId,
+                    category.id,
+                    currentContent,
+                    image,
+                    currentTitle
+                );
+
+                if (result.success) {
+                    router.refresh();
+                    router.push(`/blogs/${initialData.blogId}`);
+                } else {
+                    setErrorMsg(result.error || "Failed to update post.");
+                }
             } else {
-                setErrorMsg(result.error || "Failed to publish your SIMULA blog post.");
+                const slug = currentTitle
+                    .toLowerCase()
+                    .replace(/\s+/g, '-')
+                    .replace(/[^\w-]/g, '');
+                    
+                const result = await createPost(userId, slug, image, currentTitle, currentContent, category.id);
+
+                if (result.success && 'slug' in result) { 
+                    router.refresh();
+                    router.push(`/blogs/${result.slug}`);
+                } else {
+                    setErrorMsg(result.error || "Failed to create post.");
+                }
             }
-        });
+});
     };
 
     if (!editor) {

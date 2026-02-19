@@ -5,7 +5,7 @@ export async function getBlogs() {
     });
 
     if(!res.ok) {
-        throw new Error("Failed to fetch blogs.");
+        return null;
     }
 
     return res.json();
@@ -18,7 +18,7 @@ export async function getBlog(blogId: string) {
     });
 
     if(!res.ok) {
-        throw new Error("Post not found.");
+        return null
     }
 
     return res.json();

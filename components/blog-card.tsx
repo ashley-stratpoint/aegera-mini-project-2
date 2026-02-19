@@ -20,6 +20,10 @@ export function BlogCard({ post }: { post: any }) {
         p-0
       "
     >
+      <Link href={postHref} className="absolute inset-0 z-20">
+        <span className="sr-only">Read {post.title}</span>
+      </Link>
+      
       <div className="relative w-full aspect-video rounded-t-3xl overflow-hidden">
         <img
           src={post.imageUrl}

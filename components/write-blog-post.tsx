@@ -201,7 +201,7 @@ export default function WriteBlogPost ({ userId, initialData }: WriteBlogPostPro
                 <textarea
                     placeholder="This is your SIMULA"
                     className="w-full text-3xl md:text-5xl font-bold tracking-tight bg-transparent outline-none resize-none placeholder:text-zinc-200 border-none p-2 focus:ring-0"
-                    rows={2}
+                    rows={1}
                     value={title}
                     onChange={(e) => {
                         setTitle(e.target.value);

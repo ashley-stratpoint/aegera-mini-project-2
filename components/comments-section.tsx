@@ -7,8 +7,9 @@ import { useState, useTransition } from "react";
 import { createComment, updateComment, deleteComment } from "@/lib/actions/comments";
 import { formatDistanceToNow } from "date-fns";
 import { Pencil, Trash2, X, Check } from "lucide-react";
+import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 
-export default function CommentSection({ postId, blogId, comments, userId }: any) {
+export default function CommentsSection({ postId, blogId, comments, userId }: any) {
     const [content, setContent] = useState("");
     const [editingId, setEditingId] = useState<number | null>(null);
     const [deleteId, setDeleteId] = useState<number | null>(null);
@@ -46,8 +47,7 @@ export default function CommentSection({ postId, blogId, comments, userId }: any
 
     return (
         <div className="dark:border-zinc-900 pt-10 text-sm md:text-base">
-            
-            {/* shadcn AlertDialog for Deletion */}
+        
             <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
                 <AlertDialogContent className="rounded-3xl">
                     <AlertDialogHeader>
@@ -70,22 +70,34 @@ export default function CommentSection({ postId, blogId, comments, userId }: any
 
             <h3 className="text-2xl font-bold mb-8">Comments</h3>
 
-            {/* Input Form using shadcn Textarea */}
-            <form onSubmit={handleSubmit} className="mb-12 space-y-4">
-                <Textarea
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    placeholder="Join the conversation..."
-                    className="rounded-2xl p-4 border-zinc-200 dark:border-zinc-800 focus-visible:ring-zinc-800 min-h-[100px]"
-                />
-                <Button
-                    type="submit"
-                    disabled={isPending || !content.trim()}
-                    className="rounded-full px-8"
-                >
-                    {isPending ? "Posting..." : "Post Comment"}
-                </Button>
-            </form>
+            <SignedIn>
+                <form onSubmit={handleSubmit} className="mb-12 space-y-4">
+                    <Textarea
+                        value={content}
+                        onChange={(e) => setContent(e.target.value)}
+                        placeholder="Join the conversation..."
+                        className="rounded-2xl p-4 border-zinc-200 dark:border-zinc-800 focus-visible:ring-zinc-800 min-h-[100px]"
+                    />
+                    <Button
+                        type="submit"
+                        disabled={isPending || !content.trim()}
+                        className="rounded-full px-8"
+                    >
+                        {isPending ? "Posting..." : "Post Comment"}
+                    </Button>
+                </form>
+            </SignedIn>
+
+            <SignedOut>
+                <div className="mb-12 p-8 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-3xl text-center bg-zinc-50/50 dark:bg-zinc-900/30">
+                    <p className="text-zinc-500 mb-4">You must be signed in to join the discussion.</p>
+                    <SignInButton mode="modal">
+                        <Button variant="outline" className="rounded-full px-8">
+                            Sign in to Comment
+                        </Button>
+                    </SignInButton>
+                </div>
+            </SignedOut>
 
             <div className="space-y-8">
                 {sortedComments.map((comment: any) => {

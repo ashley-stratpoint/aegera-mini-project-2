@@ -8,13 +8,6 @@ import { cn } from '@/lib/utils'
 import { usePathname } from 'next/navigation'
 import { SignInButton, SignUpButton, UserButton, SignedIn, SignedOut } from "@clerk/nextjs";
 
-const menuItems = [
-    { name: 'Home', href: '/' },
-    { name: 'About', href: '#about' },
-    { name: 'Museum', href: '/blogs' },
-    { name: 'Contact', href: '#contact' },
-]
-
 export const HeroHeader = () => {
     const pathname = usePathname()
     const [menuState, setMenuState] = React.useState(false)
@@ -39,17 +32,6 @@ export const HeroHeader = () => {
                             </Link>
                         </div>
 
-                        <div className="hidden lg:block absolute left-1/2 -translate-x-1/2">
-                            <ul className="flex gap-8 text-sm font-medium">
-                                {menuItems.map((item, index) => (
-                                    <li key={index}>
-                                        <Link href={item.href} className="text-muted-foreground hover:text-foreground transition-colors">
-                                            {item.name}
-                                        </Link>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
                         <div className="flex items-center gap-4">
                             {!mounted ? (
                                 <div className="h-8 w-8 rounded-full bg-zinc-100 animate-pulse" />
@@ -81,24 +63,6 @@ export const HeroHeader = () => {
                         </div>
                     </div>
                 </div>
-
-                {menuState && (
-                    <div className="lg:hidden absolute top-full left-0 w-full p-4 bg-background border-b animate-in fade-in slide-in-from-top-4">
-                        <ul className="space-y-4">
-                            {menuItems.map((item, index) => (
-                                <li key={index}>
-                                    <Link 
-                                        href={item.href} 
-                                        onClick={() => setMenuState(false)}
-                                        className="block text-lg font-medium"
-                                    >
-                                        {item.name}
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                )}
             </nav>
         </header>
     )

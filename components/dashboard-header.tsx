@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react';
 import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
-import { UserButton, useUser, ClerkLoaded, ClerkLoading} from '@clerk/nextjs';
-import { Bell, PenLine } from 'lucide-react';
+import { UserButton, useUser, ClerkLoaded, ClerkLoading, SignedIn, SignedOut, SignInButton } from '@clerk/nextjs';
+import { PenLine } from 'lucide-react';
 import Link from "next/link";
+
 
 const itemVariants = {
     item: {
@@ -29,17 +30,13 @@ const itemVariants = {
 
 export default function DashboardHeader() {
     const {user, isLoaded } = useUser();
-    const [query, setQuery] = useState("");
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
         setMounted(true);
     }, []);
 
-    const handleSearch = (e: React.FormEvent) => {
-        e.preventDefault();
-        console.log("Searching for:", query);
-    };
+    if (!mounted) return null;
 
     return (
         <div className='py-5 px-5 md:px-12 lg:px-28'>
@@ -47,26 +44,29 @@ export default function DashboardHeader() {
                 <Logo className="h-8 md:h-10 lg:h-12 transition-all duration-300" />
 
                 <div className='flex items-center gap-4'>
-                    <Link href="/blogs/write" title="Create Post">
-                        <Button variant="ghost" size="icon" className="rounded-full">
+                    <SignedOut>
+                        <SignInButton mode="modal">
+                            <Button variant="ghost" size="icon" className="rounded-full">
                             <PenLine className="h-5 w-5" />
-                        </Button>
-                    </Link>
+                            </Button>
+                        </SignInButton>
+                    </SignedOut>
+
+                    <SignedIn>
+                        <Link href="/blogs/write">
+                            <Button variant="ghost" size="icon" className="rounded-full">
+                            <PenLine className="h-5 w-5" />
+                            </Button>
+                        </Link>
+                    </SignedIn>
                     <ClerkLoading>
-                        <Button variant="ghost" size="icon" className="rounded-full">
-                            <Bell className="h-5 w-5" />
-                        </Button>
+                        <div className="h-9 w-9 rounded-full bg-zinc-200 animate-pulse" />
                     </ClerkLoading>
-                    
-                    {!mounted ? (
+
+                    <ClerkLoaded>
                         <div className="flex items-center gap-4">
-                            <div className="h-4 w-24 rounded bg-zinc-200 animate-pulse hidden sm:block" />
-                            <div className="h-9 w-9 rounded-full bg-zinc-200 animate-pulse" />
-                        </div>
-                    ) : (
-                        <>
                             <div className="hidden sm:flex flex-col items-end">
-                                {isLoaded && user && (
+                                {user && (
                                     <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
                                         Hey, <span className="font-bold text-foreground capitalize">
                                             {user.firstName}
@@ -78,12 +78,12 @@ export default function DashboardHeader() {
                                 afterSignOutUrl="/" 
                                 appearance={{
                                     elements: {
-                                        avatarBox: "h-9 w-9 md:h-10 md:w-10"
+                                        avatarBox: "h-9 w-9 md:h-10 md:w-10 cursor-pointer"
                                     }
                                 }}
                             />
-                        </>
-                    )}
+                        </div>
+                    </ClerkLoaded>
                 </div>
             </div>
         </div>

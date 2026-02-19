@@ -1,9 +1,4 @@
-
 import { notFound } from "next/navigation";
-import { auth } from "@clerk/nextjs/server";
-import { db } from "@/db";
-import { users } from "@/db/schema";
-import { eq } from "drizzle-orm";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
@@ -11,19 +6,18 @@ import { Metadata } from 'next';
 import { getBlog } from "@/lib/blogs";
 import { syncUser } from "@/lib/actions/sync-user";
 import Interactions from "@/components/interactions";
-import CommentSection from "@/components/comments-section";
+import CommentsSection from "@/components/comments-section";
 import { DeletePostButton } from "@/components/delete-post-button";
 import { Button } from "@/components/ui/button";
 import WriteBlogPost from "@/components/write-blog-post";
 
 type Props = {
-    params: Promise<{ blogId: string }>;
-    searchParams: Promise<{ mode?: string }>;
+    params: { blogId: string };
+    searchParams: { mode?: string };
 }
 
 export const generateMetadata = async ({ params }: Props): Promise<Metadata> => {
     const { blogId } = await params;
-
     const post = await getBlog(blogId);
     
     if (!post) {
@@ -50,8 +44,11 @@ export const generateMetadata = async ({ params }: Props): Promise<Metadata> => 
 };
 
 export default async function BlogPostDetails({ params, searchParams }: Props) {
-    const { blogId } = await params;
-    const { mode } = await searchParams;
+    const resolvedParams = await params;
+    const resolvedSearchParams = await searchParams;
+    
+    const blogId = resolvedParams.blogId;
+    const mode = resolvedSearchParams.mode;
 
     const post = await getBlog(blogId);
     if (!post) {
@@ -59,7 +56,7 @@ export default async function BlogPostDetails({ params, searchParams }: Props) {
     }
 
     const user = await syncUser();
-    const isOwner = user?.id === post.authorId;
+    const isOwner = String(user?.id) === String(post.authorId);
 
     const isEditing = mode === "edit" && isOwner;
     const isEdited = Math.floor(new Date(post.updatedAt).getTime() / 1000) > Math.floor(new Date(post.createdAt).getTime() / 1000);
@@ -163,12 +160,14 @@ export default async function BlogPostDetails({ params, searchParams }: Props) {
                 commentCount={post.comments.length}
             />
 
-            <CommentSection 
-                postId={post.id} 
-                blogId={post.blogId} 
-                comments={post.comments} 
-                userId={user?.id}
-            />
+            <div id="comments-section">
+                <CommentsSection 
+                    postId={post.id} 
+                    blogId={post.blogId} 
+                    comments={post.comments} 
+                    userId={user?.id}
+                />
+            </div>
         </article>
     );
 }

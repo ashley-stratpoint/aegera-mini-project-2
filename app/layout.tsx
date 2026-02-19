@@ -10,7 +10,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Blog Site",
+  title: "SIMULA | Blog Site",
   description: "Created by: Ashley Egera",
 };
 

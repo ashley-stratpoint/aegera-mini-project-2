@@ -5,12 +5,14 @@ import { NextResponse } from "next/server";
 
 export async function GET(
     request: Request,
-    { params } : { params: {blogId: string } }
+    { params } : { params: Promise<{ blogId: string }> }
 ) {
     try {
         const { blogId } = await params;
+        const decodedBlogId = decodeURIComponent(blogId);
+
         const post = await db.query.posts.findFirst({
-            where: eq(posts.blogId, blogId),
+            where: eq(posts.blogId, decodedBlogId),
             with: {
                 author: {
                     columns: {

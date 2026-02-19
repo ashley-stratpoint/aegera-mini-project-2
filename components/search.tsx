@@ -13,7 +13,8 @@ export default function TaglineSearch() {
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         
-        const params = new URLSearchParams(searchParams.toString());
+        const params = new URLSearchParams();
+        
         if (query) {
             params.set("q", query);
         } else {

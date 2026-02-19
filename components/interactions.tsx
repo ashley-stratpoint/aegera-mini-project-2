@@ -3,36 +3,58 @@
 import { Heart, MessageSquare } from "lucide-react";
 import { toggleLike } from "@/lib/actions/likes";
 import { useTransition } from "react";
+import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 
 export default function Interactions({ postId, blogId, likes, userId, commentCount }: any) {
   const [isPending, startTransition] = useTransition();
-  const isLiked = likes.some((like: any) => Number(like.userId) === Number(userId));
+
+  const isLiked =
+    likes?.some((like: any) => Number(like.userId) === Number(userId)) ?? false;
 
   const handleLike = () => {
-      if (!userId) {
-          alert("Please sign in to like this post");
-          return;
-      }
-      
-      startTransition(async () => {
-          await toggleLike(Number(postId), userId, blogId);
-      });
+    startTransition(async () => {
+      await toggleLike(Number(postId), userId, blogId);
+    });
+  };
+
+  const scrollToComments = () => {
+    const element = document.getElementById("comments-section");
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   return (
-    <div className="mt-10 flex items-center gap-8 py-6 border-y border-zinc-100 dark:border-zinc-900">
-      <button 
-        onClick={handleLike}
-        disabled={isPending}
-        className={`flex items-center gap-2 font-medium transition-colors ${isLiked ? 'text-red-500' : 'text-zinc-500 hover:text-red-500'}`}
-      >
-        <Heart className={`w-6 h-6 ${isLiked ? 'fill-current' : ''}`} />
-          <span>{likes.length}</span>
-      </button>
+    <div className="mt-10 flex items-center gap-10 py-6">
+      <SignedIn>
+        <div className="flex items-center gap-1">
+          <Heart
+            onClick={handleLike}
+            className={`w-6 h-6 cursor-pointer transition ${
+              isLiked
+                ? "fill-red-500 text-red-500"
+                : "text-zinc-500 hover:text-red-500"
+            }`}
+          />
+          <span className="text-sm">{likes.length}</span>
+        </div>
+      </SignedIn>
 
-      <div className="flex items-center gap-2 text-zinc-500 font-medium">
-        <MessageSquare className="w-6 h-6" />
-        <span>{commentCount}</span>
+      <SignedOut>
+        <SignInButton mode="modal">
+          <div className="flex items-center gap-1 cursor-pointer">
+            <Heart className="w-6 h-6 text-zinc-500 hover:text-red-500 transition" />
+            <span className="text-sm">{likes.length}</span>
+          </div>
+        </SignInButton>
+      </SignedOut>
+
+      <div className="flex items-center gap-1">
+        <MessageSquare
+          onClick={scrollToComments}
+          className="w-6 h-6 cursor-pointer text-zinc-500 hover:opacity-70 transition"
+        />
+        <span className="text-sm">{commentCount}</span>
       </div>
     </div>
   );

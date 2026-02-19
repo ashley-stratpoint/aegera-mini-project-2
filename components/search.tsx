@@ -3,7 +3,6 @@
 import { ArrowRight, Search } from 'lucide-react'
 import { AnimatedGroup } from '@/components/ui/animated-group'
 import { useState } from 'react';
-import { cn } from '@/lib/utils';
 
 const itemVariants = {
     item: {
@@ -34,18 +33,11 @@ export default function TaglineSearch() {
     };
 
     return (
-        <div className="flex flex-col items-center text-center max-w-2xl mx-auto mt-0 md:mt-0 gap-10">
-            <div>
-                <h1 className="text-4xl sm:text-6xl font-bold tracking-tight">New Beginnings</h1>
-                <p className="mt-4 text-muted-foreground text-sm sm:text-base leading-relaxed">
-                    Here dwell the stories that are just beginning to shine. Peek at the newest masterpieces through these blogs.
-                </p>
-            </div>
-
-            <AnimatedGroup variants={{ item: itemVariants }}>
+        <div className="flex flex-col items-center text-center max-w-2xl mx-auto mt-0 md:mt-8 gap-10">
+            <AnimatedGroup variants={{ item: itemVariants }} className="w-full">
                 <form 
                     onSubmit={handleSearch}
-                    className="hover:bg-background dark:hover:border-t-border bg-muted group flex w-full max-w-md mb-15 items-center gap-3 rounded-full border p-1.5 pl-4 shadow-md shadow-zinc-950/5 transition-all duration-300 focus-within:ring-2 focus-within:ring-primary/20 dark:border-t-white/5 dark:shadow-zinc-950"
+                    className="hover:bg-background dark:hover:border-t-border bg-muted group flex max-w-5xl w-full mb-15 items-center gap-3 rounded-full border p-1.5 pl-4 shadow-md shadow-zinc-950/5 transition-all duration-300 focus-within:ring-2 focus-within:ring-primary/20 dark:border-t-white/5 dark:shadow-zinc-950"
                 >
                     <input 
                         type="text"

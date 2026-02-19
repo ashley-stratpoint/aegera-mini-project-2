@@ -17,8 +17,8 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <ClerkProvider>
-      <html lang="en">
-        <body className={poppins.className} suppressHydrationWarning>
+      <html lang="en" suppressHydrationWarning={true}>
+        <body className={poppins.className}>
           <main>
               {children}
           </main>

@@ -1,14 +1,17 @@
 import { getBlogs } from "@/lib/blogs";
 import { BlogCard } from "@/components/blog-card";
-import TaglineSearch from "@/components/tagline-search";
-
+import Tagline from "@/components/tagline";
+import Search from "@/components/search";
+import FeedProfileToggle from "@/components/feed-profile-toggle";
 
 export default async function BlogsPage() {
   const blogListing = await getBlogs();
 
   return (
     <div className="relative px-5 md:px-12 lg:px-28 py-10">
-      <TaglineSearch />
+      <Tagline />
+      <FeedProfileToggle />
+      <Search />
 
       <h1 className="text-3xl font-bold mb-10 tracking-tighter relative z-10">
         Blog Museum

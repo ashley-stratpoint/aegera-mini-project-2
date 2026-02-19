@@ -5,6 +5,8 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
 import { Metadata } from 'next';
 import { getBlog } from "@/lib/blogs";
 import { syncUser } from "@/lib/actions/sync-user";
@@ -53,7 +55,13 @@ export default async function BlogPostDetails({ params }: Props) {
     const user = await syncUser();
 
     return (
-        <article className="max-w-3xl mx-auto py-20 px-6">
+        <article className="max-w-3xl mx-auto py-10 px-6">
+            <div className="mb-10">
+                <Link href="/blogs" className="text-sm font-medium text-zinc-500 hover:text-black flex items-center gap-1 transition-colors">
+                    <ChevronLeft className="w-4 h-4" />
+                    Back to SIMULA
+                </Link>
+            </div>
             <div className="mb-6">
                 <Badge 
                     variant="outline" 
@@ -74,21 +82,26 @@ export default async function BlogPostDetails({ params }: Props) {
                 />
             </div>
 
-            {/* Title & Meta */}
             <header className="mb-10">
                 <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
                     {post.title}
                 </h1>
                 <div className="flex items-center gap-3 text-zinc-500">
-                    <span className="font-medium text-foreground">
-                        By {post.author.firstName} {post.author.lastName}
-                    </span>
-                    <span>•</span>
-                    <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+                    <div className="flex items-center gap-2">
+                            <img 
+                                src={post.author.imageUrl} 
+                                alt={post.author.firstName && post.author.firstName || "Author"} 
+                                className="w-6 h-6 rounded-full border border-white/20"
+                            />
+                        <span className="font-medium text-foreground">
+                            By {post.author.firstName} {post.author.lastName}
+                        </span>
+                        <span>•</span>
+                        <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+                    </div>
                 </div>
             </header>
 
-            {/* Main Content */}
             <div 
                 className="prose prose-zinc dark:prose-invert lg:prose-xl max-w-none"
                 dangerouslySetInnerHTML={{ __html: post.content }} 

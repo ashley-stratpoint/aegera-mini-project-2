@@ -1,5 +1,8 @@
 "use client";
 
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { useState, useTransition } from "react";
 import { createComment, updateComment, deleteComment } from "@/lib/actions/comments";
 import { formatDistanceToNow } from "date-fns";
@@ -8,8 +11,13 @@ import { Pencil, Trash2, X, Check } from "lucide-react";
 export default function CommentSection({ postId, blogId, comments, userId }: any) {
     const [content, setContent] = useState("");
     const [editingId, setEditingId] = useState<number | null>(null);
+    const [deleteId, setDeleteId] = useState<number | null>(null);
     const [editContent, setEditContent] = useState("");
     const [isPending, startTransition] = useTransition();
+
+    const sortedComments = [...comments].sort((a, b) => 
+        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    );
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -28,36 +36,63 @@ export default function CommentSection({ postId, blogId, comments, userId }: any
         });
     };
 
-    const handleDelete = async (commentId: number) => {
-        if (!confirm("Are you sure you want to delete this comment?")) return;
+    const confirmDelete = () => {
+        if (!deleteId) return;
         startTransition(async () => {
-            await deleteComment(commentId, blogId);
+            await deleteComment(deleteId, blogId);
+            setDeleteId(null);
         });
     };
 
     return (
-        <div className="mt-20 border-t border-zinc-100 dark:border-zinc-900 pt-10 text-sm md:text-base">
+        <div className="dark:border-zinc-900 pt-10 text-sm md:text-base">
+            
+            {/* shadcn AlertDialog for Deletion */}
+            <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+                <AlertDialogContent className="rounded-3xl">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Delete comment</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete your comment from this site.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel className="rounded-full">Cancel</AlertDialogCancel>
+                        <AlertDialogAction 
+                            onClick={confirmDelete}
+                            className="bg-red-600 hover:bg-red-700 rounded-full"
+                        >
+                            {isPending ? "Deleting..." : "Delete Comment"}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
             <h3 className="text-2xl font-bold mb-8">Comments</h3>
 
+            {/* Input Form using shadcn Textarea */}
             <form onSubmit={handleSubmit} className="mb-12 space-y-4">
-                <textarea
+                <Textarea
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                     placeholder="Join the conversation..."
-                    className="text-sm w-full p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-transparent focus:ring-2 focus:ring-zinc-800 outline-none resize-none min-h-[100px]"
+                    className="rounded-2xl p-4 border-zinc-200 dark:border-zinc-800 focus-visible:ring-zinc-800 min-h-[100px]"
                 />
-                <button
+                <Button
                     type="submit"
                     disabled={isPending || !content.trim()}
-                    className="text-sm px-6 py-2 bg-zinc-900 dark:bg-white dark:text-black text-white rounded-full font-semibold hover:opacity-90 disabled:opacity-50 transition-all"
+                    className="rounded-full px-8"
                 >
                     {isPending ? "Posting..." : "Post Comment"}
-                </button>
+                </Button>
             </form>
 
             <div className="space-y-8">
-                {comments.map((comment: any) => {
-                    const isEdited = new Date(comment.updatedAt).getTime() > new Date(comment.createdAt).getTime();
+                {sortedComments.map((comment: any) => {
+                    const createdAtDate = new Date(comment.createdAt).getTime();
+                    const updatedAtDate = new Date(comment.updatedAt).getTime();
+                    
+                    const isEdited = updatedAtDate > createdAtDate;
                     const isOwner = Number(comment.authorId) === Number(userId);
                     const isEditing = editingId === comment.id;
 
@@ -70,43 +105,37 @@ export default function CommentSection({ postId, blogId, comments, userId }: any
                                     <div className="flex items-center gap-2">
                                         <span className="font-bold">{comment.author?.firstName} {comment.author?.lastName}</span>
                                         <span className="text-xs text-zinc-500">
-                                            {formatDistanceToNow(new Date(comment.createdAt))} ago
+                                            {formatDistanceToNow(updatedAtDate)} ago
                                             {isEdited && <span className="italic ml-1">(edited)</span>}
                                         </span>
                                     </div>
 
                                     {isOwner && !isEditing && (
-                                        <div className="flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button 
-                                                onClick={() => { setEditingId(comment.id); setEditContent(comment.content); }}
-                                                className="text-zinc-400 hover:text-black-500"
-                                            >
+                                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-black" onClick={() => { setEditingId(comment.id); setEditContent(comment.content); }}>
                                                 <Pencil className="w-4 h-4" />
-                                            </button>
-                                            <button 
-                                                onClick={() => handleDelete(comment.id)}
-                                                className="text-zinc-400 hover:text-red-500"
-                                            >
+                                            </Button>
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-red-600" onClick={() => setDeleteId(comment.id)}>
                                                 <Trash2 className="w-4 h-4" />
-                                            </button>
+                                            </Button>
                                         </div>
                                     )}
                                 </div>
 
                                 {isEditing ? (
                                     <div className="space-y-3">
-                                        <textarea
+                                        <Textarea
                                             value={editContent}
                                             onChange={(e) => setEditContent(e.target.value)}
-                                            className="w-full p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-transparent outline-none focus:ring-2 focus:ring-zinc-900"
+                                            className="rounded-xl border-zinc-200 dark:border-zinc-800 focus-visible:ring-zinc-900"
                                         />
                                         <div className="flex gap-2">
-                                            <button onClick={() => handleUpdate(comment.id)} className="p-2 bg-gray-500 text-white rounded-lg hover:bg-zinc-900">
-                                                <Check className="w-4 h-4" />
-                                            </button>
-                                            <button onClick={() => setEditingId(null)} className="p-2 bg-zinc-200 dark:bg-zinc-800 rounded-lg">
-                                                <X className="w-4 h-4" />
-                                            </button>
+                                            <Button size="sm" onClick={() => handleUpdate(comment.id)} className="h-8 px-3">
+                                                <Check className="w-4 h-4 mr-2" /> Save
+                                            </Button>
+                                            <Button variant="outline" size="sm" onClick={() => setEditingId(null)} className="h-8 px-3">
+                                                <X className="w-4 h-4 mr-2" /> Cancel
+                                            </Button>
                                         </div>
                                     </div>
                                 ) : (

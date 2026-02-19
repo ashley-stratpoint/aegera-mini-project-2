@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 @plugin "tailwindcss-animate";
+@plugin "@tailwindcss/typography";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
@@ -115,6 +116,16 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+}
+
+.tiptap h1 {
+  @apply text-3xl font-bold mb-4;
+}
+.tiptap h2 {
+  @apply text-2xl font-semibold mb-3;
+}
+.tiptap h3 {
+  @apply text-xl font-medium mb-2;
 }
 
 @layer base {

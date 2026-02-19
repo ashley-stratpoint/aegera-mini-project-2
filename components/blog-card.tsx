@@ -27,16 +27,16 @@ export function BlogCard({ post }: { post: any }) {
           className="w-full h-full object-cover"
         />
         {post.author && (
-          <div className="absolute bottom-3 left-3 flex items-center gap-2 bg-black/40 px-2 py-1 rounded-full backdrop-blur-sm">
-            {post.author.image && (
+          <div className="absolute top-3 left-3 flex items-center gap-2 bg-black/40 px-2 py-1 rounded-full backdrop-blur-sm">
+            {post.author.imageUrl && (
               <img
-                src={post.author.image}
-                alt={post.author.name}
+                src={post.author.imageUrl}
+                alt={post.author.firstName && post.author.lastName || "Author"}
                 className="w-6 h-6 rounded-full border border-white/20"
               />
             )}
             <span className="text-xs text-white font-medium">
-              {post.author.name}
+              {post.author.firstName} {post.author.lastName}
             </span>
           </div>
         )}
